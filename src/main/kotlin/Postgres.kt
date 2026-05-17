@@ -1,7 +1,10 @@
 package com.example
 
+import com.example.database.Users
 import io.ktor.server.application.*
 import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.SchemaUtils
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 fun Application.configurePostgres() {
     val dbUrl = environment.config.property("database.jdbcUrl").getString()
@@ -15,6 +18,8 @@ fun Application.configurePostgres() {
         driver = dbDriver,
         password = dbPassword
     )
-
+    transaction {
+        SchemaUtils.create(Users)
+    }
     println("Successfully connected to Supabase Database!")
 }

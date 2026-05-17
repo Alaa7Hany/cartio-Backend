@@ -1,5 +1,6 @@
 package com.example
 
+import com.example.database.UserFacade
 import io.ktor.server.application.*
 import org.koin.dsl.module
 import org.koin.ktor.plugin.Koin
@@ -14,6 +15,7 @@ fun Application.configureKoin() {
                     println(environment.log.info("Hello, World!"))
                 }
             }
+            single { UserFacade() }
         })
     }
 }
