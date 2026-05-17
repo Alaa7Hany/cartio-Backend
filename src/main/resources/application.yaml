@@ -1,0 +1,18 @@
+ktor:
+  deployment:
+    port: 8080
+  application:
+    modules:
+      - com.example.HttpKt.configureHttp
+      - com.example.SerializationKt.configureSerialization
+      - com.example.SecurityKt.configureSecurity
+      - com.example.RequestValidationKt.configureRequestValidation
+      - com.example.StatusPagesKt.configureStatusPages
+      - com.example.PostgresKt.configurePostgres
+      - com.example.KoinKt.configureKoin
+      - com.example.ResourcesKt.configureResources
+      - com.example.RoutingKt.configureRouting
+
+database:
+  driver: "org.postgresql.Driver"
+  jdbcUrl: "jdbc:postgresql://aws-0-eu-west-1.pooler.supabase.com:6543/postgres?user=postgres.qeebnrhfwporabnmticw&sslmode=require"

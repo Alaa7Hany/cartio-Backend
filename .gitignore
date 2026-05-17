@@ -1,0 +1,34 @@
+# IntelliJ IDEA
+.idea/
+*.iml
+out/
+*.iws
+*.workspace
+
+# VS Code / Cursor (Just in case you switch back)
+.vscode/
+.cursor/
+
+# Gradle
+.gradle/
+build/
+/gradlew
+/gradlew.bat
+
+# OS Generated Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Kotlin
+*.kotlin_module
+*.kotlin_builtins
+*.kotlin_metadata
+
+# Environment Variables & Secrets
+local.properties
+.env
