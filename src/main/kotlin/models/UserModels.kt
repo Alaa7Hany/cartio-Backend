@@ -28,7 +28,8 @@ data class UserResponse(
     val id: String,
     val email: String,
     val fullName: String,
-    val createdAt: String
+    val createdAt: String,
+    val token: String? = null
 )
 
 data class AuthUser(

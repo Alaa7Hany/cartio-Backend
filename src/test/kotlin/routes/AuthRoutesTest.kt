@@ -3,6 +3,7 @@ package com.example.routes
 import com.example.database.UserFacade
 import com.example.models.AuthUser
 import com.example.models.UserResponse
+import com.example.utils.JwtConfig
 import io.ktor.client.HttpClient
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -17,14 +18,19 @@ import io.ktor.server.routing.routing
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class AuthRoutesTest {
@@ -34,6 +40,13 @@ class AuthRoutesTest {
     @BeforeTest
     fun setup() {
         mockFacade = mockk()
+        mockkObject(JwtConfig)
+        every { JwtConfig.generateToken(any(), any()) } returns "mocked-jwt-token"
+    }
+
+    @AfterTest
+    fun tearDown() {
+        unmockkObject(JwtConfig)
     }
 
     private val validPayload = """
@@ -158,6 +171,7 @@ class AuthRoutesTest {
         assertEquals("Login successful.", body["message"]!!.jsonPrimitive.content)
         assertEquals("john@example.com", body["data"]!!.jsonObject["email"]!!.jsonPrimitive.content)
         assertEquals("John Doe", body["data"]!!.jsonObject["fullName"]!!.jsonPrimitive.content)
+        assertEquals("mocked-jwt-token", body["data"]!!.jsonObject["token"]!!.jsonPrimitive.content)
     }
 
     @Test

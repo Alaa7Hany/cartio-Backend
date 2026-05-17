@@ -5,6 +5,7 @@ import com.example.models.BaseResponse
 import com.example.models.LoginRequest
 import com.example.models.RegisterRequest
 import com.example.models.UserResponse
+import com.example.utils.JwtConfig
 import com.example.utils.SecurityUtils
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
@@ -95,11 +96,14 @@ fun Route.authRoutes(userFacade: UserFacade) {
             return@post
         }
 
+        val token = JwtConfig.generateToken(email = user.email, userId = user.id)
+
         val userResponse = UserResponse(
             id = user.id,
             email = user.email,
             fullName = user.fullName,
-            createdAt = user.createdAt
+            createdAt = user.createdAt,
+            token = token
         )
 
         call.respond(

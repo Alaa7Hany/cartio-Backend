@@ -38,6 +38,7 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation(ktorLibs.server.testHost)
     testImplementation(ktorLibs.client.contentNegotiation)
+
     testImplementation(libs.h2database.h2)
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
