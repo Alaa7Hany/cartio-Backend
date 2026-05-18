@@ -141,4 +141,48 @@ class ProductFacadeTest {
 
         assertTrue(result)
     }
+
+    // --- getProductsByCategory ---
+
+    @Test
+    fun `getProductsByCategory returns matching products`() = runTest {
+        coEvery { facade.getProductsByCategory("cat-01") } returns listOf(sampleResponse)
+
+        val result = facade.getProductsByCategory("cat-01")
+
+        assertEquals(1, result.size)
+        assertEquals("cat-01", result.first().categoryId)
+    }
+
+    @Test
+    fun `getProductsByCategory returns empty list when no products match`() = runTest {
+        coEvery { facade.getProductsByCategory("unknown-cat") } returns emptyList()
+
+        val result = facade.getProductsByCategory("unknown-cat")
+
+        assertTrue(result.isEmpty())
+    }
+
+    // --- getAvailableCategories ---
+
+    @Test
+    fun `getAvailableCategories returns distinct category ids`() = runTest {
+        coEvery { facade.getAvailableCategories() } returns listOf("cat-01", "cat-02", "cat-03")
+
+        val result = facade.getAvailableCategories()
+
+        assertEquals(3, result.size)
+        assertTrue(result.contains("cat-01"))
+        assertTrue(result.contains("cat-02"))
+        assertTrue(result.contains("cat-03"))
+    }
+
+    @Test
+    fun `getAvailableCategories returns empty list when table is empty`() = runTest {
+        coEvery { facade.getAvailableCategories() } returns emptyList()
+
+        val result = facade.getAvailableCategories()
+
+        assertTrue(result.isEmpty())
+    }
 }

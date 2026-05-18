@@ -37,6 +37,33 @@ fun Route.productRoutes(productFacade: ProductFacade) {
         )
     }
 
+    get("/products/categories") {
+        val result = runCatching { productFacade.getAvailableCategories() }
+
+        result.fold(
+            onSuccess = { categories ->
+                call.respond(
+                    HttpStatusCode.OK,
+                    BaseResponse(
+                        data = categories,
+                        message = "Categories fetched successfully.",
+                        success = true
+                    )
+                )
+            },
+            onFailure = {
+                call.respond(
+                    HttpStatusCode.InternalServerError,
+                    BaseResponse(
+                        data = null,
+                        message = "An unexpected error occurred while fetching categories.",
+                        success = false
+                    )
+                )
+            }
+        )
+    }
+
     get("/products/{id}") {
         val id = call.parameters["id"]
 
@@ -179,4 +206,50 @@ fun Route.productRoutes(productFacade: ProductFacade) {
                 }
             )
         }
-    }
+
+            get("/products/category/{categoryId}") {
+                val categoryId = call.parameters["categoryId"]
+
+                if (categoryId.isNullOrBlank()) {
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        BaseResponse(
+                            data = null,
+                            message = "Category ID must not be empty.",
+                            success = false
+                        )
+                    )
+                    return@get
+                }
+
+                val result = runCatching { productFacade.getProductsByCategory(categoryId) }
+
+                result.fold(
+                    onSuccess = { products ->
+                        val message = if (products.isEmpty()) {
+                            "No products found in category: $categoryId"
+                        } else {
+                            "Products fetched successfully."
+                        }
+                        call.respond(
+                            HttpStatusCode.OK,
+                            BaseResponse(
+                                data = products,
+                                message = message,
+                                success = true
+                            )
+                        )
+                    },
+                    onFailure = {
+                        call.respond(
+                            HttpStatusCode.InternalServerError,
+                            BaseResponse(
+                                data = null,
+                                message = "An unexpected error occurred while fetching products by category.",
+                                success = false
+                            )
+                        )
+                    }
+                )
+            }
+        }

@@ -329,4 +329,95 @@ class ProductRoutesTest {
 
         assertEquals(HttpStatusCode.BadRequest, response.status)
     }
-}
+
+        // --- GET /products/categories ---
+
+        @Test
+        fun `GET products categories returns 200 and category list`() = setupApp { client ->
+            coEvery { mockFacade.getAvailableCategories() } returns listOf("cat-01", "cat-02")
+
+            val response = client.get("/products/categories")
+            val body = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertTrue(body["success"]!!.jsonPrimitive.content.toBoolean())
+            assertEquals("Categories fetched successfully.", body["message"]!!.jsonPrimitive.content)
+            assertEquals(2, body["data"]!!.jsonArray.size)
+            assertEquals("cat-01", body["data"]!!.jsonArray[0].jsonPrimitive.content)
+            assertEquals("cat-02", body["data"]!!.jsonArray[1].jsonPrimitive.content)
+        }
+
+        @Test
+        fun `GET products categories returns 200 with empty list when no products exist`() = setupApp { client ->
+            coEvery { mockFacade.getAvailableCategories() } returns emptyList()
+
+            val response = client.get("/products/categories")
+            val body = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertTrue(body["success"]!!.jsonPrimitive.content.toBoolean())
+            assertEquals(0, body["data"]!!.jsonArray.size)
+        }
+
+        @Test
+        fun `GET products categories returns 500 when facade throws`() = setupApp { client ->
+            coEvery { mockFacade.getAvailableCategories() } throws RuntimeException("DB error")
+
+            val response = client.get("/products/categories")
+            val body = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+
+            assertEquals(HttpStatusCode.InternalServerError, response.status)
+            assertFalse(body["success"]!!.jsonPrimitive.content.toBoolean())
+            assertEquals(
+                "An unexpected error occurred while fetching categories.",
+                body["message"]!!.jsonPrimitive.content
+            )
+        }
+
+        // --- GET /products/category/{categoryId} ---
+
+        @Test
+        fun `GET products by category returns 200 and matching products`() = setupApp { client ->
+            coEvery { mockFacade.getProductsByCategory("cat-01") } returns listOf(sampleProduct)
+
+            val response = client.get("/products/category/cat-01")
+            val body = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertTrue(body["success"]!!.jsonPrimitive.content.toBoolean())
+            assertEquals("Products fetched successfully.", body["message"]!!.jsonPrimitive.content)
+            assertEquals(1, body["data"]!!.jsonArray.size)
+            assertEquals(
+                sampleProduct.categoryId,
+                body["data"]!!.jsonArray[0].jsonObject["categoryId"]!!.jsonPrimitive.content
+            )
+        }
+
+        @Test
+        fun `GET products by category returns 200 with empty list and appropriate message`() = setupApp { client ->
+            coEvery { mockFacade.getProductsByCategory("empty-cat") } returns emptyList()
+
+            val response = client.get("/products/category/empty-cat")
+            val body = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertTrue(body["success"]!!.jsonPrimitive.content.toBoolean())
+            assertEquals("No products found in category: empty-cat", body["message"]!!.jsonPrimitive.content)
+            assertEquals(0, body["data"]!!.jsonArray.size)
+        }
+
+        @Test
+        fun `GET products by category returns 500 when facade throws`() = setupApp { client ->
+            coEvery { mockFacade.getProductsByCategory(any()) } throws RuntimeException("DB error")
+
+            val response = client.get("/products/category/cat-01")
+            val body = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+
+            assertEquals(HttpStatusCode.InternalServerError, response.status)
+            assertFalse(body["success"]!!.jsonPrimitive.content.toBoolean())
+            assertEquals(
+                "An unexpected error occurred while fetching products by category.",
+                body["message"]!!.jsonPrimitive.content
+            )
+        }
+    }

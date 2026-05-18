@@ -8,6 +8,7 @@ import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.batchInsert
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.insertReturning
+import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.experimental.newSuspendedTransaction
 import kotlin.uuid.ExperimentalUuidApi
@@ -62,6 +63,20 @@ class ProductFacade {
                 println("BATCH INSERT ERROR: ${exception.message}")
                 exception.printStackTrace()
             }.isSuccess
+        }
+
+    suspend fun getProductsByCategory(categoryId: String): List<ProductResponse> =
+        newSuspendedTransaction(Dispatchers.IO) {
+            Products.selectAll()
+                .where { Products.categoryId eq categoryId }
+                .map { row -> row.toProductResponse() }
+        }
+
+    suspend fun getAvailableCategories(): List<String> =
+        newSuspendedTransaction(Dispatchers.IO) {
+            Products.select(Products.categoryId)
+                .withDistinct()
+                .map { it[Products.categoryId] }
         }
 
     @OptIn(ExperimentalUuidApi::class)
