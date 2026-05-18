@@ -1,0 +1,144 @@
+package com.example.database
+
+import com.example.models.CreateProductRequest
+import com.example.models.ProductResponse
+import io.mockk.coEvery
+import io.mockk.mockk
+import kotlinx.coroutines.test.runTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
+
+class ProductFacadeTest {
+
+    private val facade: ProductFacade = mockk()
+
+    private val sampleRequest = CreateProductRequest(
+        title = "Test Product",
+        description = "A great product",
+        price = 9.99,
+        imageUrl = "https://example.com/image.png",
+        categoryId = "cat-01"
+    )
+
+    private val sampleResponse = ProductResponse(
+        id = "550e8400-e29b-41d4-a716-446655440000",
+        title = "Test Product",
+        description = "A great product",
+        price = 9.99,
+        imageUrl = "https://example.com/image.png",
+        categoryId = "cat-01"
+    )
+
+    // --- getAllProducts ---
+
+    @Test
+    fun `getAllProducts returns a list of products`() = runTest {
+        coEvery { facade.getAllProducts() } returns listOf(sampleResponse)
+
+        val result = facade.getAllProducts()
+
+        assertEquals(1, result.size)
+        assertEquals(sampleResponse, result.first())
+    }
+
+    @Test
+    fun `getAllProducts returns empty list when table is empty`() = runTest {
+        coEvery { facade.getAllProducts() } returns emptyList()
+
+        val result = facade.getAllProducts()
+
+        assertTrue(result.isEmpty())
+    }
+
+    // --- getProductById ---
+
+    @Test
+    fun `getProductById returns product for valid existing UUID`() = runTest {
+        coEvery { facade.getProductById(sampleResponse.id) } returns sampleResponse
+
+        val result = facade.getProductById(sampleResponse.id)
+
+        assertNotNull(result)
+        assertEquals(sampleResponse.id, result.id)
+        assertEquals(sampleResponse.title, result.title)
+        assertEquals(sampleResponse.price, result.price)
+    }
+
+    @Test
+    fun `getProductById returns null for non-existent UUID`() = runTest {
+        val unknownId = "00000000-0000-0000-0000-000000000000"
+        coEvery { facade.getProductById(unknownId) } returns null
+
+        val result = facade.getProductById(unknownId)
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `getProductById returns null for malformed UUID string`() = runTest {
+        val malformedId = "not-a-uuid"
+        coEvery { facade.getProductById(malformedId) } returns null
+
+        val result = facade.getProductById(malformedId)
+
+        assertNull(result)
+    }
+
+    // --- insertProduct ---
+
+    @Test
+    fun `insertProduct returns ProductResponse on success`() = runTest {
+        coEvery { facade.insertProduct(sampleRequest) } returns sampleResponse
+
+        val result = facade.insertProduct(sampleRequest)
+
+        assertNotNull(result)
+        assertEquals(sampleResponse.title, result.title)
+        assertEquals(sampleResponse.price, result.price)
+        assertEquals(sampleResponse.categoryId, result.categoryId)
+    }
+
+    @Test
+    fun `insertProduct returns null when insert fails`() = runTest {
+        coEvery { facade.insertProduct(sampleRequest) } returns null
+
+        val result = facade.insertProduct(sampleRequest)
+
+        assertNull(result)
+    }
+
+    // --- insertProducts ---
+
+    @Test
+    fun `insertProducts returns true when batch insert succeeds`() = runTest {
+        val requests = listOf(sampleRequest, sampleRequest.copy(title = "Second Product"))
+        coEvery { facade.insertProducts(requests) } returns true
+
+        val result = facade.insertProducts(requests)
+
+        assertTrue(result)
+    }
+
+    @Test
+    fun `insertProducts returns false when batch insert fails`() = runTest {
+        val requests = listOf(sampleRequest)
+        coEvery { facade.insertProducts(requests) } returns false
+
+        val result = facade.insertProducts(requests)
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun `insertProducts with empty list returns true (no-op)`() = runTest {
+        coEvery { facade.insertProducts(emptyList()) } returns true
+
+        val result = facade.insertProducts(emptyList())
+
+        assertTrue(result)
+    }
+}
