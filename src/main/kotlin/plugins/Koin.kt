@@ -1,5 +1,6 @@
 package com.example
 
+import com.example.database.ProductFacade
 import com.example.database.UserFacade
 import io.ktor.server.application.*
 import org.koin.dsl.module
@@ -10,12 +11,8 @@ fun Application.configureKoin() {
     install(Koin) {
         slf4jLogger()
         modules(module {
-            single<HelloService> {
-                HelloService {
-                    println(environment.log.info("Hello, World!"))
-                }
-            }
             single { UserFacade() }
+            single { ProductFacade() }
         })
     }
 }

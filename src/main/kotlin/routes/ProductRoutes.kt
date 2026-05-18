@@ -1,0 +1,130 @@
+package com.example.routes
+
+import com.example.database.ProductFacade
+import com.example.models.BaseResponse
+import com.example.models.CreateProductRequest
+import io.ktor.http.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+
+fun Route.productRoutes(productFacade: ProductFacade) {
+
+    get("/products") {
+        val result = runCatching { productFacade.getAllProducts() }
+
+        result.fold(
+            onSuccess = { products ->
+                call.respond(
+                    HttpStatusCode.OK,
+                    BaseResponse(
+                        data = products,
+                        message = "Products fetched successfully.",
+                        success = true
+                    )
+                )
+            },
+            onFailure = {
+                call.respond(
+                    HttpStatusCode.InternalServerError,
+                    BaseResponse(
+                        data = null,
+                        message = "An unexpected error occurred while fetching products.",
+                        success = false
+                    )
+                )
+            }
+        )
+    }
+
+    get("/products/{id}") {
+        val id = call.parameters["id"]
+
+        if (id.isNullOrBlank()) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                BaseResponse(
+                    data = null,
+                    message = "Product ID must not be empty.",
+                    success = false
+                )
+            )
+            return@get
+        }
+
+        val result = runCatching { productFacade.getProductById(id) }
+
+        result.fold(
+            onSuccess = { product ->
+                if (product != null) {
+                    call.respond(
+                        HttpStatusCode.OK,
+                        BaseResponse(
+                            data = product,
+                            message = "Product fetched successfully.",
+                            success = true
+                        )
+                    )
+                } else {
+                    call.respond(
+                        HttpStatusCode.NotFound,
+                        BaseResponse(
+                            data = null,
+                            message = "No product found with ID: $id",
+                            success = false
+                        )
+                    )
+                }
+            },
+            onFailure = {
+                call.respond(
+                    HttpStatusCode.InternalServerError,
+                    BaseResponse(
+                        data = null,
+                        message = "An unexpected error occurred while fetching the product.",
+                        success = false
+                    )
+                )
+            }
+        )
+    }
+
+        post("/products") {
+            val request = call.receive<CreateProductRequest>()
+            val result = runCatching { productFacade.insertProduct(request) }
+
+            result.fold(
+                onSuccess = { product ->
+                    if (product != null) {
+                        call.respond(
+                            HttpStatusCode.Created,
+                            BaseResponse(
+                                data = product,
+                                message = "Product created successfully.",
+                                success = true
+                            )
+                        )
+                    } else {
+                        call.respond(
+                            HttpStatusCode.InternalServerError,
+                            BaseResponse(
+                                data = null,
+                                message = "Product could not be created.",
+                                success = false
+                            )
+                        )
+                    }
+                },
+                onFailure = {
+                    call.respond(
+                        HttpStatusCode.InternalServerError,
+                        BaseResponse(
+                            data = null,
+                            message = "An unexpected error occurred while creating the product.",
+                            success = false
+                        )
+                    )
+                }
+            )
+        }
+    }

@@ -1,5 +1,6 @@
 package com.example
 
+import com.example.database.Products
 import com.example.database.Users
 import io.ktor.server.application.*
 import org.jetbrains.exposed.v1.jdbc.Database
@@ -20,6 +21,7 @@ fun Application.configurePostgres() {
     )
     transaction {
         SchemaUtils.create(Users)
+        SchemaUtils.create(Users, Products)
     }
     println("Successfully connected to Supabase Database!")
 }
