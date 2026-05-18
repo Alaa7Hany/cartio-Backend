@@ -5,6 +5,8 @@ import com.example.models.ProductResponse
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.batchInsert
+import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.insertReturning
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.experimental.newSuspendedTransaction
@@ -41,6 +43,25 @@ class ProductFacade {
                 it[imageUrl] = request.imageUrl
                 it[categoryId] = request.categoryId
             }.singleOrNull()?.toProductResponse()
+        }
+
+    @OptIn(ExperimentalUuidApi::class)
+    suspend fun insertProducts(requests: List<CreateProductRequest>): Boolean =
+        newSuspendedTransaction(Dispatchers.IO) {
+            runCatching {
+                requests.forEach { request ->
+                    Products.insert {
+                        it[title] = request.title
+                        it[description] = request.description
+                        it[price] = request.price
+                        it[imageUrl] = request.imageUrl
+                        it[categoryId] = request.categoryId
+                    }
+                }
+            }.onFailure { exception ->
+                println("BATCH INSERT ERROR: ${exception.message}")
+                exception.printStackTrace()
+            }.isSuccess
         }
 
     @OptIn(ExperimentalUuidApi::class)

@@ -127,4 +127,56 @@ fun Route.productRoutes(productFacade: ProductFacade) {
                 }
             )
         }
+
+        post("/products/batch") {
+            val requests = call.receive<List<CreateProductRequest>>()
+
+            if (requests.isEmpty()) {
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    BaseResponse(
+                        data = null,
+                        message = "Request body must contain at least one product.",
+                        success = false
+                    )
+                )
+                return@post
+            }
+
+            val result = runCatching { productFacade.insertProducts(requests) }
+
+            result.fold(
+                onSuccess = { success ->
+                    if (success) {
+                        call.respond(
+                            HttpStatusCode.Created,
+                            BaseResponse(
+                                data = "Batch insert successful.",
+                                message = "Batch insert successful.",
+                                success = true
+                            )
+                        )
+                    } else {
+                        call.respond(
+                            HttpStatusCode.InternalServerError,
+                            BaseResponse(
+                                data = null,
+                                message = "Batch insert failed. No products were saved.",
+                                success = false
+                            )
+                        )
+                    }
+                },
+                onFailure = {
+                    call.respond(
+                        HttpStatusCode.InternalServerError,
+                        BaseResponse(
+                            data = null,
+                            message = "An unexpected error occurred during batch insert.",
+                            success = false
+                        )
+                    )
+                }
+            )
+        }
     }
