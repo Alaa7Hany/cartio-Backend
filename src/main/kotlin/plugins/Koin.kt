@@ -1,6 +1,7 @@
 package com.example
 
 import com.example.database.CartFacade
+import com.example.database.OrderFacade
 import com.example.database.ProductFacade
 import com.example.database.UserFacade
 import io.ktor.server.application.*
@@ -15,6 +16,7 @@ fun Application.configureKoin() {
             single { UserFacade() }
             single { ProductFacade() }
             single { CartFacade() }
+            single { OrderFacade() }
         })
     }
 }
