@@ -12,9 +12,63 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
-import kotlin.uuid.ExperimentalUuidApi
+import io.ktor.server.routing.get
+import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.principal
 
 fun Route.authRoutes(userFacade: UserFacade) {
+
+    authenticate("auth-jwt") {
+        get("/auth/me") {
+            val email = call.principal<JWTPrincipal>()?.payload?.getClaim("email")?.asString()
+
+            if (email == null) {
+                call.respond(
+                    HttpStatusCode.Unauthorized,
+                    BaseResponse(
+                        data = null,
+                        message = "Unauthorized.",
+                        success = false
+                    )
+                )
+                return@get
+            }
+
+            val user = userFacade.getUserByEmail(email)
+
+            if (user == null) {
+                call.respond(
+                    HttpStatusCode.NotFound,
+                    BaseResponse(
+                        data = null,
+                        message = "User not found.",
+                        success = false
+                    )
+                )
+                return@get
+            }
+
+            val token = JwtConfig.generateToken(email = user.email, userId = user.id)
+
+            val userResponse = UserResponse(
+                id = user.id,
+                email = user.email,
+                fullName = user.fullName,
+                createdAt = user.createdAt,
+                token = token
+            )
+
+            call.respond(
+                HttpStatusCode.OK,
+                BaseResponse(
+                    data = userResponse,
+                    message = "Session restored successfully.",
+                    success = true
+                )
+            )
+        }
+    }
 
     post("/register") {
         val request = call.receive<RegisterRequest>()

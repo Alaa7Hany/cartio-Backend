@@ -5,6 +5,8 @@ import com.example.models.AuthUser
 import com.example.models.UserResponse
 import com.example.utils.JwtConfig
 import io.ktor.client.HttpClient
+import io.ktor.client.request.get
+import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
@@ -22,20 +24,45 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
+import com.auth0.jwt.JWT
+import com.auth0.jwt.algorithms.Algorithm
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.jwt.jwt
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import java.util.Date
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class AuthRoutesTest {
 
     private lateinit var mockFacade: UserFacade
+
+    private val jwtSecret = "test-secret"
+    private val validEmail = "john@example.com"
+    private val validToken: String by lazy {
+        JWT.create()
+            .withIssuer("cartio-backend")
+            .withAudience("cartio-users")
+            .withClaim("email", validEmail)
+            .withClaim("userId", "some-uuid")
+            .withExpiresAt(Date(System.currentTimeMillis() + 86_400_000L))
+            .sign(Algorithm.HMAC256(jwtSecret))
+    }
+
+    private val noEmailToken: String by lazy {
+        JWT.create()
+            .withIssuer("cartio-backend")
+            .withAudience("cartio-users")
+            .withClaim("userId", "some-uuid")
+            .withExpiresAt(Date(System.currentTimeMillis() + 86_400_000L))
+            .sign(Algorithm.HMAC256(jwtSecret))
+    }
 
     @BeforeTest
     fun setup() {
@@ -85,6 +112,22 @@ class AuthRoutesTest {
             install(io.ktor.server.plugins.statuspages.StatusPages) {
                 exception<io.ktor.server.plugins.BadRequestException> { call, _ ->
                     call.respond(HttpStatusCode.BadRequest)
+                }
+            }
+            install(io.ktor.server.auth.Authentication) {
+                jwt("auth-jwt") {
+                    realm = "cartio-backend"
+                    verifier(
+                        JWT.require(Algorithm.HMAC256(jwtSecret))
+                            .withIssuer("cartio-backend")
+                            .withAudience("cartio-users")
+                            .build()
+                    )
+                    validate { credential ->
+                        if (credential.payload.getClaim("email").asString() != null || credential.payload.getClaim("userId").asString() != null) {
+                            JWTPrincipal(credential.payload)
+                        } else null
+                    }
                 }
             }
             routing { authRoutes(mockFacade) }
@@ -216,5 +259,53 @@ class AuthRoutesTest {
         }
 
         assertEquals(HttpStatusCode.BadRequest, response.status)
+    }
+
+    // --- Auth Me (Session Restoration) Tests ---
+
+    @Test
+    fun `GET auth me returns 200 and user data when token is valid`() = setupApp { client ->
+        coEvery { mockFacade.getUserByEmail(validEmail) } returns fakeAuthUser
+
+        val response = client.get("/auth/me") {
+            header("Authorization", "Bearer $validToken")
+        }
+
+        val body = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertTrue(body["success"]!!.jsonPrimitive.content.toBoolean())
+        assertEquals("Session restored successfully.", body["message"]!!.jsonPrimitive.content)
+        assertEquals(validEmail, body["data"]!!.jsonObject["email"]!!.jsonPrimitive.content)
+        assertEquals("John Doe", body["data"]!!.jsonObject["fullName"]!!.jsonPrimitive.content)
+        assertEquals("mocked-jwt-token", body["data"]!!.jsonObject["token"]!!.jsonPrimitive.content)
+    }
+
+    @Test
+    fun `GET auth me returns 404 when user does not exist in db`() = setupApp { client ->
+        coEvery { mockFacade.getUserByEmail(validEmail) } returns null
+
+        val response = client.get("/auth/me") {
+            header("Authorization", "Bearer $validToken")
+        }
+
+        val body = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+
+        assertEquals(HttpStatusCode.NotFound, response.status)
+        assertFalse(body["success"]!!.jsonPrimitive.content.toBoolean())
+        assertEquals("User not found.", body["message"]!!.jsonPrimitive.content)
+    }
+
+    @Test
+    fun `GET auth me returns 401 when token has missing or invalid email`() = setupApp { client ->
+        val response = client.get("/auth/me") {
+            header("Authorization", "Bearer $noEmailToken")
+        }
+
+        val body = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+
+        assertEquals(HttpStatusCode.Unauthorized, response.status)
+        assertFalse(body["success"]!!.jsonPrimitive.content.toBoolean())
+        assertEquals("Unauthorized.", body["message"]!!.jsonPrimitive.content)
     }
 }
