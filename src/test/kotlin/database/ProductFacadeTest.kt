@@ -185,4 +185,25 @@ class ProductFacadeTest {
 
         assertTrue(result.isEmpty())
     }
+
+    // --- searchProducts ---
+
+    @Test
+    fun `searchProducts returns matching products for query`() = runTest {
+        coEvery { facade.searchProducts("test") } returns listOf(sampleResponse)
+
+        val result = facade.searchProducts("test")
+
+        assertEquals(1, result.size)
+        assertEquals(sampleResponse.id, result.first().id)
+    }
+
+    @Test
+    fun `searchProducts returns empty list when no products match`() = runTest {
+        coEvery { facade.searchProducts("unknown") } returns emptyList()
+
+        val result = facade.searchProducts("unknown")
+
+        assertTrue(result.isEmpty())
+    }
 }

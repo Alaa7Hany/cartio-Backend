@@ -374,6 +374,57 @@ class ProductRoutesTest {
             )
         }
 
+        // --- GET /products/search ---
+
+        @Test
+        fun `GET products search returns 200 and list of matching products`() = setupApp { client ->
+            coEvery { mockFacade.searchProducts("test") } returns listOf(sampleProduct)
+
+            val response = client.get("/products/search?q=test")
+            val body = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertTrue(body["success"]!!.jsonPrimitive.content.toBoolean())
+            assertEquals("Search completed successfully.", body["message"]!!.jsonPrimitive.content)
+            assertEquals(1, body["data"]!!.jsonArray.size)
+            assertEquals(sampleProduct.id, body["data"]!!.jsonArray[0].jsonObject["id"]!!.jsonPrimitive.content)
+        }
+
+        @Test
+        fun `GET products search returns 400 when query is blank`() = setupApp { client ->
+            val response = client.get("/products/search?q=")
+            val body = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+
+            assertEquals(HttpStatusCode.BadRequest, response.status)
+            assertFalse(body["success"]!!.jsonPrimitive.content.toBoolean())
+            assertEquals("Search query must not be empty.", body["message"]!!.jsonPrimitive.content)
+        }
+
+        @Test
+        fun `GET products search returns 400 when query is missing`() = setupApp { client ->
+            val response = client.get("/products/search")
+            val body = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+
+            assertEquals(HttpStatusCode.BadRequest, response.status)
+            assertFalse(body["success"]!!.jsonPrimitive.content.toBoolean())
+            assertEquals("Search query must not be empty.", body["message"]!!.jsonPrimitive.content)
+        }
+
+        @Test
+        fun `GET products search returns 500 when facade throws`() = setupApp { client ->
+            coEvery { mockFacade.searchProducts(any()) } throws RuntimeException("DB error")
+
+            val response = client.get("/products/search?q=test")
+            val body = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+
+            assertEquals(HttpStatusCode.InternalServerError, response.status)
+            assertFalse(body["success"]!!.jsonPrimitive.content.toBoolean())
+            assertEquals(
+                "An unexpected error occurred during search.",
+                body["message"]!!.jsonPrimitive.content
+            )
+        }
+
         // --- GET /products/category/{categoryId} ---
 
         @Test
