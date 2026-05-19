@@ -2,6 +2,8 @@ package com.example
 
 import com.example.database.CartItems
 import com.example.database.Carts
+import com.example.database.OrderItems
+import com.example.database.Orders
 import com.example.database.Products
 import com.example.database.Users
 import io.ktor.server.application.*
@@ -35,7 +37,7 @@ fun Application.configurePostgres() {
     }
 
     transaction {
-        SchemaUtils.create(Users, Products, Carts, CartItems)
+        SchemaUtils.create(Users, Products, Carts, CartItems, Orders, OrderItems)
     }
 
     println("Successfully connected to Supabase Database!")
