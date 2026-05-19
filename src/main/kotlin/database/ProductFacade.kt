@@ -20,9 +20,12 @@ import kotlin.uuid.Uuid
 class ProductFacade {
 
     @OptIn(ExperimentalUuidApi::class)
-    suspend fun getAllProducts(): List<ProductResponse> =
+    suspend fun getAllProducts(page: Int = 1, limit: Int = 20): List<ProductResponse> =
         newSuspendedTransaction(Dispatchers.IO) {
+            val offsetAmount = ((page - 1) * limit).toLong()
             Products.selectAll()
+                .limit(limit)
+                .offset(offsetAmount)
                 .map { row -> row.toProductResponse() }
         }
 

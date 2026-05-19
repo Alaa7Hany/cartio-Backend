@@ -11,7 +11,10 @@ import io.ktor.server.routing.*
 fun Route.productRoutes(productFacade: ProductFacade) {
 
     get("/products") {
-        val result = runCatching { productFacade.getAllProducts() }
+        val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
+        val limit = call.request.queryParameters["limit"]?.toIntOrNull() ?: 20
+
+        val result = runCatching { productFacade.getAllProducts(page, limit) }
 
         result.fold(
             onSuccess = { products ->

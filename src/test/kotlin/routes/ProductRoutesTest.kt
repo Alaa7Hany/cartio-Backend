@@ -91,7 +91,7 @@ class ProductRoutesTest {
 
     @Test
     fun `GET products returns 200 and product list`() = setupApp { client ->
-        coEvery { mockFacade.getAllProducts() } returns listOf(sampleProduct)
+        coEvery { mockFacade.getAllProducts(1, 20) } returns listOf(sampleProduct)
 
         val response = client.get("/products")
         val body = Json.parseToJsonElement(response.bodyAsText()).jsonObject
@@ -104,8 +104,22 @@ class ProductRoutesTest {
     }
 
     @Test
+    fun `GET products with pagination parameters returns 200 and product list`() = setupApp { client ->
+        coEvery { mockFacade.getAllProducts(2, 5) } returns listOf(sampleProduct)
+
+        val response = client.get("/products?page=2&limit=5")
+        val body = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertTrue(body["success"]!!.jsonPrimitive.content.toBoolean())
+        assertEquals("Products fetched successfully.", body["message"]!!.jsonPrimitive.content)
+        assertEquals(1, body["data"]!!.jsonArray.size)
+        assertEquals(sampleProduct.id, body["data"]!!.jsonArray[0].jsonObject["id"]!!.jsonPrimitive.content)
+    }
+
+    @Test
     fun `GET products returns 200 with empty list when no products exist`() = setupApp { client ->
-        coEvery { mockFacade.getAllProducts() } returns emptyList()
+        coEvery { mockFacade.getAllProducts(1, 20) } returns emptyList()
 
         val response = client.get("/products")
         val body = Json.parseToJsonElement(response.bodyAsText()).jsonObject
@@ -117,7 +131,7 @@ class ProductRoutesTest {
 
     @Test
     fun `GET products returns 500 when facade throws`() = setupApp { client ->
-        coEvery { mockFacade.getAllProducts() } throws RuntimeException("DB error")
+        coEvery { mockFacade.getAllProducts(any(), any()) } throws RuntimeException("DB error")
 
         val response = client.get("/products")
         val body = Json.parseToJsonElement(response.bodyAsText()).jsonObject

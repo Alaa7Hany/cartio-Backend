@@ -36,8 +36,8 @@ class ProductFacadeTest {
     // --- getAllProducts ---
 
     @Test
-    fun `getAllProducts returns a list of products`() = runTest {
-        coEvery { facade.getAllProducts() } returns listOf(sampleResponse)
+    fun `getAllProducts returns a list of products using default parameters`() = runTest {
+        coEvery { facade.getAllProducts(1, 20) } returns listOf(sampleResponse)
 
         val result = facade.getAllProducts()
 
@@ -46,8 +46,18 @@ class ProductFacadeTest {
     }
 
     @Test
+    fun `getAllProducts returns a list of products using custom parameters`() = runTest {
+        coEvery { facade.getAllProducts(2, 5) } returns listOf(sampleResponse)
+
+        val result = facade.getAllProducts(2, 5)
+
+        assertEquals(1, result.size)
+        assertEquals(sampleResponse, result.first())
+    }
+
+    @Test
     fun `getAllProducts returns empty list when table is empty`() = runTest {
-        coEvery { facade.getAllProducts() } returns emptyList()
+        coEvery { facade.getAllProducts(1, 20) } returns emptyList()
 
         val result = facade.getAllProducts()
 
