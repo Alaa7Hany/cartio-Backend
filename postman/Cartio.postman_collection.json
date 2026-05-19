@@ -1,0 +1,512 @@
+{
+  "info": {
+    "_postman_id": "482dfb4c-1c36-4dba-baad-668a8513975c",
+    "name": "Cartio",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "41766313"
+  },
+  "item": [
+    {
+      "name": "auth",
+      "item": [
+        {
+          "name": "login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"gui_test@example.com\",\r\n  \"password\": \"SecurePassword123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "register",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"gui_test@example.com\",\r\n  \"password\": \"SecurePassword123\",\r\n  \"fullName\": \"John Doe\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "auth/me",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjYXJ0aW8tYmFja2VuZCIsImF1ZCI6ImNhcnRpby11c2VycyIsImVtYWlsIjoiZ3VpX3Rlc3RAZXhhbXBsZS5jb20iLCJ1c2VySWQiOiIxMWYxMzYzOS01M2Q2LTQ3ZmItYjVjZC01ODRhMDdiNzM5Y2YiLCJleHAiOjE3NzkzMDk1NTZ9.e51zjk4q0KD_en-4e3kLPV02bBx1A5XsU9lxTT__bnI",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "### 🔐 Authentication Module Overview\n\nThis folder handles user registration, login, and secure session management.\n\n**Standard Response Format:**  \nEvery endpoint in this folder (and the entire API) strictly returns a `BaseResponse` wrapper. You can always expect this JSON structure:\n\nJSON\n\n```\n{\n  \"success\": true,\n  \"message\": \"A descriptive message here\",\n  \"data\": { ... } // or null on error\n}\n\n ```\n\n#### 1\\. Register a New User\n\n- **Endpoint:** `POST /register`\n    \n- **Body (JSON):** Requires `email`, `password`, and `fullName`.\n    \n- **Purpose:** Creates a new user account and securely hashes the password before storing it in Supabase.\n    \n- **Expected Responses:**\n    \n    - `201 Created`: Registration successful (returns user data).\n        \n    - `409 Conflict`: The email address is already registered.\n        \n\n#### 2\\. User Login\n\n- **Endpoint:** `POST /login`\n    \n- **Body (JSON):** Requires `email` and `password`.\n    \n- **Purpose:** Authenticates the user's credentials against the stored hash. If successful, it generates and returns a secure JWT (JSON Web Token).\n    \n- **Expected Responses:**\n    \n    - `200 OK`: Login successful. **Note:** _Make sure to extract the JWT from the returned_ `_data_` _object to use as a Bearer Token in subsequent protected requests!_\n        \n    - `401 Unauthorized`: Invalid email or password.\n        \n\n#### 3\\. Session Restoration (Auto-Login)\n\n- **Endpoint:** `GET /auth/me`\n    \n- **Headers:** Requires `Authorization: Bearer` .\n    \n- **Purpose:** Validates an existing JWT and fetches the user's profile. This is used by the mobile app to silently log the user back in when they open the app, without asking for their password again.\n    \n- **Expected Responses:**\n    \n    - `200 OK`: Token is valid, returns the user's profile data.\n        \n    - `401 Unauthorized`: The token is missing, expired, or invalid."
+    },
+    {
+      "name": "products",
+      "item": [
+        {
+          "name": "search",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/search?q=Headphones",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "Headphones"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "products/id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/62f86e51-3674-45bc-af65-a4f9c6a25b08",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "62f86e51-3674-45bc-af65-a4f9c6a25b08"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "products/page",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products?page=3&limit=3",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "3"
+                },
+                {
+                  "key": "limit",
+                  "value": "3"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "products/categories/name",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/category/fitness",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "category",
+                "fitness"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "products/batch",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "[\r\n  {\r\n    \"title\": \"Mechanical Keyboard\",\r\n    \"description\": \"Tenkeyless mechanical keyboard with tactile brown switches.\",\r\n    \"price\": 129.99,\r\n    \"imageUrl\": \"https://images.unsplash.com/photo-1595225476474-87563907a212\",\r\n    \"categoryId\": \"electronics\"\r\n  },\r\n  {\r\n    \"title\": \"Ergonomic Desk Chair\",\r\n    \"description\": \"Breathable mesh back with adjustable lumbar support.\",\r\n    \"price\": 249.50,\r\n    \"imageUrl\": \"https://images.unsplash.com/photo-1505843490538-5133c6c7d0e1\",\r\n    \"categoryId\": \"furniture\"\r\n  },\r\n  {\r\n    \"title\": \"Stainless Steel Water Bottle\",\r\n    \"description\": \"Double-wall vacuum insulated, keeps drinks cold for 24 hours.\",\r\n    \"price\": 35.00,\r\n    \"imageUrl\": \"https://images.unsplash.com/photo-1602143407151-7111542de6e8\",\r\n    \"categoryId\": \"accessories\"\r\n  }\r\n]",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/products/batch",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "batch"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "products",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"title\": \"Premium Wireless Headphones\",\r\n  \"description\": \"High-fidelity over-ear headphones with active noise cancellation and 40-hour battery life.\",\r\n  \"price\": 199.99,\r\n  \"imageUrl\": \"https://images.unsplash.com/photo-1505740420928-5e560c06d30e\",\r\n  \"categoryId\": \"electronics\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "categories",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "### 🛍️ Product Catalog Module Overview\n\nThis folder manages the entire product catalog, including discovery, filtering, and content management.\n\n**Standard Response Format:**\n\nEvery endpoint strictly returns a `BaseResponse` wrapper.\n\n#### 1\\. Fetch All Products (Paginated)\n\n- **Endpoint**: `GET /products`\n    \n- **Query Parameters**: Accepts `page` (defaults to 1) and `limit` (defaults to 20).\n    \n- **Purpose**: Fetches a chunked list of products to optimize data transfer for mobile clients.\n    \n- **Expected Response**: `200 OK` with a paginated list of `ProductResponse` objects.\n    \n\n#### 2\\. Search Products\n\n- **Endpoint**: `GET /products/search?q={term}`\n    \n- **Query Parameter**: Requires `q` (the search term).\n    \n- **Purpose**: Performs a case-insensitive search across product titles and descriptions. This endpoint remains unauthenticated to allow anonymous browsing.\n    \n- **Expected Responses**:\n    \n    - `200 OK`: Returns matching products, or an empty list if none match.\n        \n    - `400 Bad Request`: Returned if the query is null or blank.\n        \n\n#### 3\\. Get Single Product\n\n- **Endpoint**: `GET /products/{id}`\n    \n- **Purpose**: Fetches a single product by its unique UUID.\n    \n- **Expected Responses**:\n    \n    - `200 OK`: Returns a single `ProductResponse`.\n        \n    - `404 Not Found`: Returned if the UUID does not exist.\n        \n\n#### 4\\. Categories & Filtering\n\n- **Get All Categories**: `GET /products/categories` dynamically fetches all unique category strings currently in the database.\n    \n- **Filter by Category**: `GET /products/category/{categoryId}` returns a filtered list of products belonging to a specific category.\n    \n\n#### 5\\. Product Creation (Admin)\n\n- **Single Insert**: `POST /products` accepts a `CreateProductRequest` payload and returns a `201 Created` with the new product.\n    \n- **Batch Insert**: `POST /products/batch` accepts a list of `CreateProductRequest` payloads to efficiently seed the database in a safe atomic transaction."
+    },
+    {
+      "name": "cart",
+      "item": [
+        {
+          "name": "cart/id",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjYXJ0aW8tYmFja2VuZCIsImF1ZCI6ImNhcnRpby11c2VycyIsImVtYWlsIjoiZ3VpX3Rlc3RAZXhhbXBsZS5jb20iLCJ1c2VySWQiOiIxMWYxMzYzOS01M2Q2LTQ3ZmItYjVjZC01ODRhMDdiNzM5Y2YiLCJleHAiOjE3NzkyOTk4OTZ9.NcxL1ZZcTDfdJ6QXNF8UHjfmuVu9xsLXsG4Pnb8Q99s",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"quantity\": 10\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/cart/f26ae5da-7658-4612-a382-dfc88df4d961",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "cart",
+                "f26ae5da-7658-4612-a382-dfc88df4d961"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "cart/add",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjYXJ0aW8tYmFja2VuZCIsImF1ZCI6ImNhcnRpby11c2VycyIsImVtYWlsIjoiZ3VpX3Rlc3RAZXhhbXBsZS5jb20iLCJ1c2VySWQiOiIxMWYxMzYzOS01M2Q2LTQ3ZmItYjVjZC01ODRhMDdiNzM5Y2YiLCJleHAiOjE3NzkyOTk4OTZ9.NcxL1ZZcTDfdJ6QXNF8UHjfmuVu9xsLXsG4Pnb8Q99s",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"productId\": \"30c7f87c-96df-455d-bda0-e8760b07266b\",\r\n  \"quantity\": 1\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/cart/add",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "cart",
+                "add"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "cart/id",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjYXJ0aW8tYmFja2VuZCIsImF1ZCI6ImNhcnRpby11c2VycyIsImVtYWlsIjoiZ3VpX3Rlc3RAZXhhbXBsZS5jb20iLCJ1c2VySWQiOiIxMWYxMzYzOS01M2Q2LTQ3ZmItYjVjZC01ODRhMDdiNzM5Y2YiLCJleHAiOjE3NzkyOTk4OTZ9.NcxL1ZZcTDfdJ6QXNF8UHjfmuVu9xsLXsG4Pnb8Q99s",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/cart/6f39c420-175b-4e68-932f-d07b5277d256",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "cart",
+                "6f39c420-175b-4e68-932f-d07b5277d256"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "cart",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjYXJ0aW8tYmFja2VuZCIsImF1ZCI6ImNhcnRpby11c2VycyIsImVtYWlsIjoiZ3VpX3Rlc3RAZXhhbXBsZS5jb20iLCJ1c2VySWQiOiIxMWYxMzYzOS01M2Q2LTQ3ZmItYjVjZC01ODRhMDdiNzM5Y2YiLCJleHAiOjE3NzkyOTk4OTZ9.NcxL1ZZcTDfdJ6QXNF8UHjfmuVu9xsLXsG4Pnb8Q99s",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/cart",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "cart"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "### 🛒 Shopping Cart Module Overview\n\nThis folder handles the dynamic, highly mutable state of a user's pre-purchase intent. It acts as the bridge between the static product catalog and the final checkout process.\n\n**Security & Flow:**\n\nEvery endpoint in this folder is strictly protected. You **must** provide a valid `Authorization: Bearer` in the header for these requests to work. The server securely identifies the user from this token, so you never need to pass a `userId` in the request body.\n\n#### 1\\. Fetch Current Cart\n\n- **Endpoint:** `GET /cart`\n    \n- **Purpose:** Retrieves the current user's active shopping cart, including all item details and the calculated subtotal. If the user does not have a cart yet, an empty one is automatically generated and returned.\n    \n- **Expected Response:** `200 OK` with a populated `CartResponse` object.\n    \n\n#### 2\\. Add Item to Cart\n\n- **Endpoint:** `POST /cart/add`\n    \n- **Body (JSON):** Requires `productId` (String) and `quantity` (Int).\n    \n- **Purpose:** Adds a product to the cart. If the product is already in the cart, it safely increments the existing quantity.\n    \n- **Expected Response:** `200 OK` returning the newly updated `CartResponse`.\n    \n\n#### 3\\. Update Item Quantity\n\n- **Endpoint:** `PUT /cart/{itemId}`\n    \n- **Path Parameter:** `itemId` (the specific UUID of the _cart item_, not the product ID).\n    \n- **Body (JSON):** Requires `quantity` (Int).\n    \n- **Purpose:** Directly sets the quantity of a cart item. If you pass a quantity of `0` or lower, the item is automatically deleted from the cart.\n    \n- **Expected Response:** `200 OK` returning the updated `CartResponse`.\n    \n\n#### 4\\. Remove Item from Cart\n\n- **Endpoint:** `DELETE /cart/{itemId}`\n    \n- **Path Parameter:** `itemId`\n    \n- **Purpose:** Instantly and completely removes that specific item row from the cart.\n    \n- **Expected Response:** `200 OK` returning the updated `CartResponse`."
+    },
+    {
+      "name": "checkout",
+      "item": [
+        {
+          "name": "orders",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjYXJ0aW8tYmFja2VuZCIsImF1ZCI6ImNhcnRpby11c2VycyIsImVtYWlsIjoiZ3VpX3Rlc3RAZXhhbXBsZS5jb20iLCJ1c2VySWQiOiIxMWYxMzYzOS01M2Q2LTQ3ZmItYjVjZC01ODRhMDdiNzM5Y2YiLCJleHAiOjE3NzkyOTk4OTZ9.NcxL1ZZcTDfdJ6QXNF8UHjfmuVu9xsLXsG4Pnb8Q99s",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "orders"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "checkout",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjYXJ0aW8tYmFja2VuZCIsImF1ZCI6ImNhcnRpby11c2VycyIsImVtYWlsIjoiZ3VpX3Rlc3RAZXhhbXBsZS5jb20iLCJ1c2VySWQiOiIxMWYxMzYzOS01M2Q2LTQ3ZmItYjVjZC01ODRhMDdiNzM5Y2YiLCJleHAiOjE3NzkyOTk4OTZ9.NcxL1ZZcTDfdJ6QXNF8UHjfmuVu9xsLXsG4Pnb8Q99s",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/checkout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "checkout"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "### 💳 Checkout & Orders Module Overview\n\nThis folder acts as the financial backbone of the application. It is responsible for converting the temporary, highly mutable state of a shopping cart into a permanent, immutable order receipt.\n\n**Security & Data Integrity:**\n\nEvery endpoint here is strictly protected by JWT authentication (`authenticate(\"auth-jwt\")`). The checkout process uses strict atomic database transactions to guarantee an \"all-or-nothing\" execution, preventing partial charges if a crash occurs mid-request. Crucially, this module locks in the `priceAtCheckout` for every item, ensuring that future price changes in the product catalog do not retroactively alter past receipts.\n\n#### 1\\. Trigger Checkout\n\n- **Endpoint:** `POST /checkout`\n    \n- **Purpose:** Executes the atomic transaction to finalize a purchase. It validates the user, calculates the total, creates the parent order record, migrates cart items into permanent order items, and empties the active cart.\n    \n- **Expected Responses:**\n    \n    - `200 OK`: Checkout successful, returning the final `OrderResponse`.\n        \n    - `400 Bad Request`: Returned if the user's cart is empty or not found.\n        \n\n#### 2\\. Get Order History\n\n- **Endpoint:** `GET /orders`\n    \n- **Purpose:** Fetches a chronological history of the user's past purchases, sorted by date descending. It joins the immutable order data with current product metadata (like titles and images) to build a rich receipt for the UI.\n    \n- **Expected Response:** `200 OK` returning a list of `OrderResponse` objects."
+    }
+  ]
+}
