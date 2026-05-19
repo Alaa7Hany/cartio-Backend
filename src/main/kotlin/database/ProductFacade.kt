@@ -5,6 +5,9 @@ import com.example.models.ProductResponse
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.like
+import org.jetbrains.exposed.v1.core.lowerCase
+import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.jdbc.batchInsert
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.insertReturning
@@ -77,6 +80,14 @@ class ProductFacade {
             Products.select(Products.categoryId)
                 .withDistinct()
                 .map { it[Products.categoryId] }
+        }
+
+    suspend fun searchProducts(query: String): List<ProductResponse> =
+        newSuspendedTransaction(Dispatchers.IO) {
+            val searchTerm = "%${query.lowercase()}%"
+            Products.selectAll()
+                .where { (Products.title.lowerCase() like searchTerm) or (Products.description.lowerCase() like searchTerm) }
+                .map { row -> row.toProductResponse() }
         }
 
     @OptIn(ExperimentalUuidApi::class)

@@ -64,6 +64,47 @@ fun Route.productRoutes(productFacade: ProductFacade) {
         )
     }
 
+    get("/products/search") {
+        val query = call.request.queryParameters["q"]
+
+        if (query.isNullOrBlank()) {
+            call.respond(
+                HttpStatusCode.BadRequest,
+                BaseResponse(
+                    data = null as List<com.example.models.ProductResponse>?,
+                    message = "Search query must not be empty.",
+                    success = false
+                )
+            )
+            return@get
+        }
+
+        val result = runCatching { productFacade.searchProducts(query) }
+
+        result.fold(
+            onSuccess = { products ->
+                call.respond(
+                    HttpStatusCode.OK,
+                    BaseResponse(
+                        data = products,
+                        message = "Search completed successfully.",
+                        success = true
+                    )
+                )
+            },
+            onFailure = {
+                call.respond(
+                    HttpStatusCode.InternalServerError,
+                    BaseResponse(
+                        data = null as List<com.example.models.ProductResponse>?,
+                        message = "An unexpected error occurred during search.",
+                        success = false
+                    )
+                )
+            }
+        )
+    }
+
     get("/products/{id}") {
         val id = call.parameters["id"]
 
