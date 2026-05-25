@@ -1,31 +1,27 @@
 package com.example
 
-import com.example.database.CartItems
-import com.example.database.Carts
-import com.example.database.Favorites
-import com.example.database.OrderItems
-import com.example.database.Orders
-import com.example.database.Products
-import com.example.database.Users
+import com.example.database.*
 import io.ktor.server.application.*
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 fun Application.configurePostgres() {
-    val dbUrl = environment.config.property("database.jdbcUrl").getString()
-    val dbDriver = environment.config.property("database.driver").getString()
+    val dbDriver = environment.config.propertyOrNull("database.driver")?.getString() ?: "org.postgresql.Driver"
 
+    val rawDbUrl = System.getenv("DB_URL")
+        ?: throw IllegalStateException("FATAL: DB_URL environment variable is missing!")
+    val dbUser = System.getenv("DB_USER")
+        ?: throw IllegalStateException("FATAL: DB_USER environment variable is missing!")
     val dbPassword = System.getenv("DB_PASSWORD")
         ?: throw IllegalStateException("FATAL: DB_PASSWORD environment variable is missing!")
 
-    // Append prepareThreshold=0 to disable server-side prepared statement caching,
-    // preventing "prepared statement already exists" conflicts on reconnection.
-    val safeDbUrl = if (dbUrl.contains("prepareThreshold")) {
-        dbUrl
+    val baseJdbcUrl = "$rawDbUrl?user=$dbUser&sslmode=require"
+
+    val safeDbUrl = if (baseJdbcUrl.contains("prepareThreshold")) {
+        baseJdbcUrl
     } else {
-        val separator = if (dbUrl.contains("?")) "&" else "?"
-        "$dbUrl${separator}prepareThreshold=0"
+        "$baseJdbcUrl&prepareThreshold=0"
     }
 
     if (!DatabaseHolder.isInitialized) {

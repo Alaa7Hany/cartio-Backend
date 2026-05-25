@@ -15,4 +15,3 @@ ktor:
 
 database:
   driver: "org.postgresql.Driver"
-  jdbcUrl: "jdbc:postgresql://aws-0-eu-west-1.pooler.supabase.com:6543/postgres?user=postgres.qeebnrhfwporabnmticw&sslmode=require"
