@@ -2,6 +2,7 @@ package com.example
 
 import com.example.database.CartItems
 import com.example.database.Carts
+import com.example.database.Favorites
 import com.example.database.OrderItems
 import com.example.database.Orders
 import com.example.database.Products
@@ -37,7 +38,7 @@ fun Application.configurePostgres() {
     }
 
     transaction {
-        SchemaUtils.create(Users, Products, Carts, CartItems, Orders, OrderItems)
+        SchemaUtils.create(Users, Products, Carts, CartItems, Orders, OrderItems, Favorites)
     }
 
     println("Successfully connected to Supabase Database!")

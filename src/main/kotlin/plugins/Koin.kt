@@ -1,6 +1,7 @@
 package com.example
 
 import com.example.database.CartFacade
+import com.example.database.FavoriteFacade
 import com.example.database.OrderFacade
 import com.example.database.ProductFacade
 import com.example.database.UserFacade
@@ -17,6 +18,7 @@ fun Application.configureKoin() {
             single { ProductFacade() }
             single { CartFacade() }
             single { OrderFacade() }
+            single { FavoriteFacade() }
         })
     }
 }
