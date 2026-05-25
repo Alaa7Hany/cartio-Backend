@@ -49,6 +49,7 @@ class ProductFacade {
                 it[price] = request.price
                 it[imageUrl] = request.imageUrl
                 it[categoryId] = request.categoryId
+                it[isFeatured] = request.isFeatured
             }.singleOrNull()?.toProductResponse()
         }
 
@@ -63,6 +64,7 @@ class ProductFacade {
                         it[price] = request.price
                         it[imageUrl] = request.imageUrl
                         it[categoryId] = request.categoryId
+                        it[isFeatured] = request.isFeatured
                     }
                 }
             }.onFailure { exception ->
@@ -93,6 +95,13 @@ class ProductFacade {
                 .map { row -> row.toProductResponse() }
         }
 
+    suspend fun getFeaturedProducts(): List<ProductResponse> =
+        newSuspendedTransaction(Dispatchers.IO) {
+            Products.selectAll()
+                .where { Products.isFeatured eq true }
+                .map { row -> row.toProductResponse() }
+        }
+
     @OptIn(ExperimentalUuidApi::class)
     private fun ResultRow.toProductResponse() = ProductResponse(
         id = this[Products.id].toString(),
@@ -100,6 +109,7 @@ class ProductFacade {
         description = this[Products.description],
         price = this[Products.price],
         imageUrl = this[Products.imageUrl],
-        categoryId = this[Products.categoryId]
+        categoryId = this[Products.categoryId],
+        isFeatured = this[Products.isFeatured]
     )
 }

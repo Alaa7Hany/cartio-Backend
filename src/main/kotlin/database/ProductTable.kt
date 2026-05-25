@@ -11,6 +11,7 @@ object Products : Table("products") {
     val price = double("price")
     val imageUrl = varchar("image_url", 512)
     val categoryId = varchar("category_id", 128)
+    val isFeatured = bool("is_featured").default(false)
 
     override val primaryKey = PrimaryKey(id)
 }

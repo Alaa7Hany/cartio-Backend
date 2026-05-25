@@ -30,7 +30,8 @@ class ProductFacadeTest {
         description = "A great product",
         price = 9.99,
         imageUrl = "https://example.com/image.png",
-        categoryId = "cat-01"
+        categoryId = "cat-01",
+        isFeatured = false
     )
 
     // --- getAllProducts ---
@@ -213,6 +214,27 @@ class ProductFacadeTest {
         coEvery { facade.searchProducts("unknown") } returns emptyList()
 
         val result = facade.searchProducts("unknown")
+
+        assertTrue(result.isEmpty())
+    }
+
+    // --- getFeaturedProducts ---
+
+    @Test
+    fun `getFeaturedProducts returns matching featured products`() = runTest {
+        coEvery { facade.getFeaturedProducts() } returns listOf(sampleResponse.copy(isFeatured = true))
+
+        val result = facade.getFeaturedProducts()
+
+        assertEquals(1, result.size)
+        assertTrue(result.first().isFeatured)
+    }
+
+    @Test
+    fun `getFeaturedProducts returns empty list when no featured products match`() = runTest {
+        coEvery { facade.getFeaturedProducts() } returns emptyList()
+
+        val result = facade.getFeaturedProducts()
 
         assertTrue(result.isEmpty())
     }

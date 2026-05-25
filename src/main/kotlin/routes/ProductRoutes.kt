@@ -108,6 +108,33 @@ fun Route.productRoutes(productFacade: ProductFacade) {
         )
     }
 
+    get("/products/featured") {
+        val result = runCatching { productFacade.getFeaturedProducts() }
+
+        result.fold(
+            onSuccess = { products ->
+                call.respond(
+                    HttpStatusCode.OK,
+                    BaseResponse(
+                        data = products,
+                        message = "Featured products fetched successfully.",
+                        success = true
+                    )
+                )
+            },
+            onFailure = {
+                call.respond(
+                    HttpStatusCode.InternalServerError,
+                    BaseResponse(
+                        data = null as List<com.example.models.ProductResponse>?,
+                        message = "An unexpected error occurred while fetching featured products.",
+                        success = false
+                    )
+                )
+            }
+        )
+    }
+
     get("/products/{id}") {
         val id = call.parameters["id"]
 

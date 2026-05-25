@@ -40,7 +40,8 @@ class ProductRoutesTest {
         description = "A great product",
         price = 9.99,
         imageUrl = "https://example.com/image.png",
-        categoryId = "cat-01"
+        categoryId = "cat-01",
+        isFeatured = false
     )
 
     private val singleProductJson = """
@@ -49,7 +50,8 @@ class ProductRoutesTest {
             "description": "A great product",
             "price": 9.99,
             "imageUrl": "https://example.com/image.png",
-            "categoryId": "cat-01"
+            "categoryId": "cat-01",
+            "isFeatured": false
         }
     """.trimIndent()
 
@@ -60,14 +62,16 @@ class ProductRoutesTest {
                 "description": "First product",
                 "price": 4.99,
                 "imageUrl": "https://example.com/one.png",
-                "categoryId": "cat-01"
+                "categoryId": "cat-01",
+                "isFeatured": false
             },
             {
                 "title": "Product Two",
                 "description": "Second product",
                 "price": 14.99,
                 "imageUrl": "https://example.com/two.png",
-                "categoryId": "cat-02"
+                "categoryId": "cat-02",
+                "isFeatured": true
             }
         ]
     """.trimIndent()
@@ -202,6 +206,34 @@ class ProductRoutesTest {
             "An unexpected error occurred while fetching the product.",
             body["message"]!!.jsonPrimitive.content
         )
+    }
+
+    // --- GET /products/featured ---
+
+    @Test
+    fun `GET featured products returns 200 and product list`() = setupApp { client ->
+        coEvery { mockFacade.getFeaturedProducts() } returns listOf(sampleProduct.copy(isFeatured = true))
+
+        val response = client.get("/products/featured")
+        val body = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertTrue(body["success"]!!.jsonPrimitive.content.toBoolean())
+        assertEquals("Featured products fetched successfully.", body["message"]!!.jsonPrimitive.content)
+        assertEquals(1, body["data"]!!.jsonArray.size)
+        assertEquals(sampleProduct.id, body["data"]!!.jsonArray[0].jsonObject["id"]!!.jsonPrimitive.content)
+        assertTrue(body["data"]!!.jsonArray[0].jsonObject["isFeatured"]!!.jsonPrimitive.content.toBoolean())
+    }
+
+    @Test
+    fun `GET featured products returns 500 when facade throws`() = setupApp { client ->
+        coEvery { mockFacade.getFeaturedProducts() } throws RuntimeException("DB error")
+
+        val response = client.get("/products/featured")
+        val body = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+
+        assertEquals(HttpStatusCode.InternalServerError, response.status)
+        assertFalse(body["success"]!!.jsonPrimitive.content.toBoolean())
     }
 
     // --- POST /products ---
