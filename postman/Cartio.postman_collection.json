@@ -506,7 +506,111 @@
           "response": []
         }
       ],
-      "description": "### 💳 Checkout & Orders Module Overview\n\nThis folder acts as the financial backbone of the application. It is responsible for converting the temporary, highly mutable state of a shopping cart into a permanent, immutable order receipt.\n\n**Security & Data Integrity:**\n\nEvery endpoint here is strictly protected by JWT authentication (`authenticate(\"auth-jwt\")`). The checkout process uses strict atomic database transactions to guarantee an \"all-or-nothing\" execution, preventing partial charges if a crash occurs mid-request. Crucially, this module locks in the `priceAtCheckout` for every item, ensuring that future price changes in the product catalog do not retroactively alter past receipts.\n\n#### 1\\. Trigger Checkout\n\n- **Endpoint:** `POST /checkout`\n    \n- **Purpose:** Executes the atomic transaction to finalize a purchase. It validates the user, calculates the total, creates the parent order record, migrates cart items into permanent order items, and empties the active cart.\n    \n- **Expected Responses:**\n    \n    - `200 OK`: Checkout successful, returning the final `OrderResponse`.\n        \n    - `400 Bad Request`: Returned if the user's cart is empty or not found.\n        \n\n#### 2\\. Get Order History\n\n- **Endpoint:** `GET /orders`\n    \n- **Purpose:** Fetches a chronological history of the user's past purchases, sorted by date descending. It joins the immutable order data with current product metadata (like titles and images) to build a rich receipt for the UI.\n    \n- **Expected Response:** `200 OK` returning a list of `OrderResponse` objects."
+      "description": "### 💳 Checkout & Orders Module Overview\n\nThis folder acts as the financial backbone of the application. It is responsible for converting the temporary, highly mutable state of a shopping cart into a permanent, immutable order receipt.\n\n**Security & Data Integrity:**\n\nEvery endpoint here is strictly protected by JWT authentication (`authenticate(\"auth-jwt\")`). The checkout process uses strict atomic database transactions to guarantee an \"all-or-nothing\" execution, preventing partial charges if a crash occurs mid-request. Crucially, this module locks in the `priceAtCheckout` for every item, ensuring that future price changes in the product catalog do not retroactively alter past receipts.\n\n#### 1\\. Trigger Checkout\n\n- **Endpoint:** `POST /checkout`\n    \n- **Purpose:** Executes the atomic transaction to finalize a purchase. It validates the user, calculates the total, creates the parent order record, migrates cart items into permanent order items, and empties the active cart.\n    \n- **Expected Responses:**\n    \n    - `200 OK`: Checkout successful, returning the final `OrderResponse`.\n        \n    - `400 Bad Request`: Returned if the user's cart is empty or not found.\n        \n\n#### 2\\. Get Order History\n\n- **Endpoint:** `GET /orders`\n    \n- **Purpose:** Fetches a chronological history of the user's past purchases, sorted by date descending. It joins the immutable order data with current product metadata (like titles and images) to build a rich receipt for the UI.\n    \n  - **Expected Response:** `200 OK` returning a list of `OrderResponse` objects."
+    },
+    {
+      "name": "favorites",
+      "item": [
+        {
+          "name": "favorites",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjYXJ0aW8tYmFja2VuZCIsImF1ZCI6ImNhcnRpby11c2VycyIsImVtYWlsIjoiZ3VpX3Rlc3RAZXhhbXBsZS5jb20iLCJ1c2VySWQiOiIxMWYxMzYzOS01M2Q2LTQ3ZmItYjVjZC01ODRhMDdiNzM5Y2YiLCJleHAiOjE3NzkyOTk4OTZ9.NcxL1ZZcTDfdJ6QXNF8UHjfmuVu9xsLXsG4Pnb8Q99s",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/favorites",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "favorites"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "favorites/productId",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjYXJ0aW8tYmFja2VuZCIsImF1ZCI6ImNhcnRpby11c2VycyIsImVtYWlsIjoiZ3VpX3Rlc3RAZXhhbXBsZS5jb20iLCJ1c2VySWQiOiIxMWYxMzYzOS01M2Q2LTQ3ZmItYjVjZC01ODRhMDdiNzM5Y2YiLCJleHAiOjE3NzkyOTk4OTZ9.NcxL1ZZcTDfdJ6QXNF8UHjfmuVu9xsLXsG4Pnb8Q99s",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/favorites/eb57fa3c-d784-4fe1-baef-c22f6e91ea6b",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "favorites",
+                "eb57fa3c-d784-4fe1-baef-c22f6e91ea6b"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "favorites/productId",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjYXJ0aW8tYmFja2VuZCIsImF1ZCI6ImNhcnRpby11c2VycyIsImVtYWlsIjoiZ3VpX3Rlc3RAZXhhbXBsZS5jb20iLCJ1c2VySWQiOiIxMWYxMzYzOS01M2Q2LTQ3ZmItYjVjZC01ODRhMDdiNzM5Y2YiLCJleHAiOjE3NzkyOTk4OTZ9.NcxL1ZZcTDfdJ6QXNF8UHjfmuVu9xsLXsG4Pnb8Q99s",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/favorites/eb57fa3c-d784-4fe1-baef-c22f6e91ea6b",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "favorites",
+                "eb57fa3c-d784-4fe1-baef-c22f6e91ea6b"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "### ⭐ Favorites (Wishlist) Module Overview\n\nThis folder handles the dynamic state of a user's wishlist/favorites. It provides endpoints to manage their liked products.\n\n**Security & Flow:**\n\nEvery endpoint in this folder requires an `Authorization: Bearer` token in the header. The `userId` is securely resolved from the payload.\n\n#### 1\\. Fetch Favorites\n\n- **Endpoint:** `GET /favorites`\n- **Purpose:** Retrieves the current user's list of favorite products mapping metadata.\n- **Expected Response:** `200 OK` giving array of `ProductResponse` elements.\n\n#### 2\\. Add Favorite\n\n- **Endpoint:** `POST /favorites/{productId}`\n- **Purpose:** Associates a specific product to the user's wishlist. Fails gracefully if product does not exist.\n- **Expected Response:** `200 OK`\n\n#### 3\\. Remove Favorite\n\n- **Endpoint:** `DELETE /favorites/{productId}`\n- **Purpose:** Unlinks a specific product from their wishlist bounds.\n- **Expected Response:** `200 OK` on valid deletion."
     }
   ]
 }
